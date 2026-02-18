@@ -57,7 +57,7 @@ SupportIQ is a **5-agent autonomous support operations system** powered by Elast
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/your-org/supportiq
+git clone https://github.com/whiterven/support-iq
 cd supportiq
 pip install -r requirements.txt
 ```
