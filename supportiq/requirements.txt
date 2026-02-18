@@ -1,0 +1,29 @@
+# SupportIQ — Python Dependencies
+
+# Core HTTP client
+requests>=2.31.0
+httpx>=0.26.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Data processing
+numpy>=1.26.0
+
+# Date utilities
+python-dateutil>=2.8.2
+
+# Optional: Slack SDK for advanced bot features
+slack-sdk>=3.27.0
+
+# Optional: Google Cloud for Vertex AI direct access
+google-cloud-aiplatform>=1.50.0
+google-auth>=2.28.0
+
+# Optional: LiveKit for voice interface
+livekit>=0.17.0
+livekit-agents>=0.8.0
+
+# Dev tools
+pytest>=8.0.0
+black>=24.0.0
