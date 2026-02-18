@@ -1,0 +1,11 @@
+{
+  "id": "supportiq_critic",
+  "name": "SupportIQ Critic",
+  "description": "Quality gate: scores drafts, rejects low quality with specific critique.",
+  "inference_id": "supportiq-gemini-25-pro",
+  "a2a_enabled": true,
+  "tools": [
+    "score_resolution_quality"
+  ],
+  "notes": "Full system prompt defined in setup/03_agents.py. This file is the human-readable reference config."
+}

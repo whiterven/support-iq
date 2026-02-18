@@ -1,0 +1,43 @@
+# SupportIQ Workflow: CRM Update & Ticket Close
+# Triggered by: Solver agent (auto-resolve) or human approval
+# Action: Close ticket in ES, update CRM, notify Slack
+id: supportiq_crm_update
+name: "SupportIQ: CRM Update & Close"
+trigger:
+  type: webhook
+  method: POST
+  path: /supportiq/resolve
+
+steps:
+  - id: update_elasticsearch
+    type: elasticsearch
+    action: update_by_query
+    index: support-tickets
+    query:
+      term:
+        ticket_id: "{{ctx.body.ticket_id}}"
+    update:
+      status: resolved
+      resolution_final: "{{ctx.body.resolution_text}}"
+      resolved_by: "{{ctx.body.resolved_by}}"
+      updated_at: "{{now()}}"
+
+  - id: update_crm
+    type: http
+    method: PATCH
+    url: "{{env.CRM_API_URL}}/tickets/{{ctx.body.ticket_id}}"
+    headers:
+      Authorization: "Bearer {{env.CRM_API_KEY}}"
+    body:
+      status: resolved
+      resolution: "{{ctx.body.resolution_text}}"
+      resolved_by_ai: "{{ctx.body.is_auto_resolved}}"
+      confidence_score: "{{ctx.body.confidence}}"
+
+  - id: slack_notify_resolved
+    type: http
+    method: POST
+    url: "{{env.SLACK_WEBHOOK_URL}}"
+    body:
+      channel: "{{env.SLACK_SUPPORT_CHANNEL}}"
+      text: ":white_check_mark: *Resolved:* `{{ctx.body.ticket_id}}` | Method: {{ctx.body.resolved_by}} | Confidence: {{ctx.body.confidence}}"

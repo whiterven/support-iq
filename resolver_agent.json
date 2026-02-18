@@ -1,0 +1,11 @@
+{
+  "id": "supportiq_resolver",
+  "name": "SupportIQ Solver",
+  "description": "Resolution agent: searches KB, drafts resolution, decides action.",
+  "inference_id": "supportiq-gemini-25-pro",
+  "a2a_enabled": true,
+  "tools": [
+    "search_knowledge_base"
+  ],
+  "notes": "Full system prompt defined in setup/03_agents.py. This file is the human-readable reference config."
+}

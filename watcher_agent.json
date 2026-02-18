@@ -1,0 +1,12 @@
+{
+  "id": "supportiq_watcher",
+  "name": "SupportIQ Watcher",
+  "description": "Intake agent: enriches tickets with semantic matches and customer profile.",
+  "inference_id": "supportiq-gemini-25-pro",
+  "a2a_enabled": true,
+  "tools": [
+    "find_similar_tickets",
+    "get_customer_profile"
+  ],
+  "notes": "Full system prompt defined in setup/03_agents.py. This file is the human-readable reference config."
+}

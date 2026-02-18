@@ -1,0 +1,14 @@
+{
+  "id": "supportiq_analyst",
+  "name": "SupportIQ Analyst",
+  "description": "Insights: weekly reports, KB gap detection, Ghost Ticket alerts, RLHF.",
+  "inference_id": "supportiq-gemini-25-pro",
+  "a2a_enabled": true,
+  "tools": [
+    "weekly_performance_metrics",
+    "kb_gap_detector",
+    "detect_ticket_surge",
+    "correlate_spike_to_deployment"
+  ],
+  "notes": "Full system prompt defined in setup/03_agents.py. This file is the human-readable reference config."
+}

@@ -1,0 +1,33 @@
+# SupportIQ Workflow: Ticket Intake
+# Triggered by: POST webhook from Slack / email / API
+# Action: Write incoming ticket to Elasticsearch, send Slack ACK
+id: supportiq_ticket_intake
+name: "SupportIQ: Ticket Intake"
+trigger:
+  type: webhook
+  method: POST
+  path: /supportiq/intake
+
+steps:
+  - id: index_ticket
+    type: elasticsearch
+    action: index
+    index: support-tickets
+    document:
+      ticket_id: "{{ctx.body.ticket_id}}"
+      created_at: "{{now()}}"
+      updated_at: "{{now()}}"
+      status: open
+      title: "{{ctx.body.title}}"
+      description: "{{ctx.body.description}}"
+      customer_id: "{{ctx.body.customer_id}}"
+      category: "{{ctx.body.category}}"
+      resolution_attempts: 0
+
+  - id: slack_ack
+    type: http
+    method: POST
+    url: "{{env.SLACK_WEBHOOK_URL}}"
+    body:
+      channel: "{{env.SLACK_SUPPORT_CHANNEL}}"
+      text: ":ticket: *New ticket:* `{{ctx.body.ticket_id}}` — {{ctx.body.title}} | _SupportIQ analyzing..._"

@@ -1,0 +1,13 @@
+{
+  "id": "supportiq_triage",
+  "name": "SupportIQ Judge",
+  "description": "Triage agent: scores priority, detects surges, correlates deployments.",
+  "inference_id": "supportiq-gemini-25-pro",
+  "a2a_enabled": true,
+  "tools": [
+    "score_ticket_priority",
+    "detect_ticket_surge",
+    "correlate_spike_to_deployment"
+  ],
+  "notes": "Full system prompt defined in setup/03_agents.py. This file is the human-readable reference config."
+}

@@ -1,0 +1,61 @@
+# SupportIQ Workflow: Ghost Ticket Surge Alert
+# Triggered by: Judge or Analyst agent when surge + deployment correlation detected
+# Action: Pre-emptive alert to BOTH support team AND engineering with draft template
+id: supportiq_ghost_alert
+name: "SupportIQ: Ghost Ticket Surge Alert"
+trigger:
+  type: webhook
+  method: POST
+  path: /supportiq/ghost-alert
+
+steps:
+  - id: alert_support_team
+    type: http
+    method: POST
+    url: "{{env.SLACK_WEBHOOK_URL}}"
+    body:
+      channel: "{{env.SLACK_ALERTS_CHANNEL}}"
+      blocks:
+        - type: header
+          text:
+            type: plain_text
+            text: "🚨 Ghost Ticket Alert — Surge Detected"
+        - type: section
+          text:
+            type: mrkdwn
+            text: |
+              *Category:* `{{ctx.body.category}}`
+              *Current rate:* {{ctx.body.current_hourly_rate}} tickets/hr ({{ctx.body.sigma_level}}σ above baseline)
+              *Likely cause:* Deployment `{{ctx.body.deployment_id}}` ({{ctx.body.service}}) at {{ctx.body.deployed_at}}
+        - type: section
+          text:
+            type: mrkdwn
+            text: "*📋 Draft Response Template:*\n```{{ctx.body.draft_template}}```"
+        - type: context
+          elements:
+            - type: mrkdwn
+              text: "_SupportIQ detected this before it hit your queue. Monitoring actively._"
+
+  - id: alert_engineering
+    type: http
+    method: POST
+    url: "{{env.SLACK_WEBHOOK_URL}}"
+    body:
+      channel: "{{env.SLACK_ENGINEERING_CHANNEL}}"
+      text: |
+        :warning: *SupportIQ Deployment Correlation Alert*
+        Deployment `{{ctx.body.deployment_id}}` of `{{ctx.body.service}}` is causing a surge in `{{ctx.body.category}}` tickets.
+        *{{ctx.body.current_count}} tickets in {{ctx.body.window_minutes}} minutes* ({{ctx.body.sigma_level}}σ above baseline)
+        Rollback available: {{ctx.body.rollback_available}}
+
+  - id: log_trace
+    type: elasticsearch
+    action: index
+    index: agent-traces
+    document:
+      trace_id: "ghost-{{ctx.body.category}}-{{now()}}"
+      timestamp: "{{now()}}"
+      agent_name: analyst
+      action: ghost_ticket_alert
+      decision: pre_emptive_alert
+      output_summary: "Surge in {{ctx.body.category}} correlated with {{ctx.body.deployment_id}}"

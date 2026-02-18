@@ -1,0 +1,58 @@
+# SupportIQ Workflow: KB Article Draft for Review
+# Triggered by: Analyst agent (KB gap detection)
+# Action: Index draft, post to Slack for 1-click human approval
+id: supportiq_kb_draft
+name: "SupportIQ: KB Draft for Review"
+trigger:
+  type: webhook
+  method: POST
+  path: /supportiq/kb-draft
+
+steps:
+  - id: index_draft_article
+    type: elasticsearch
+    action: index
+    index: knowledge-base
+    document:
+      article_id: "DRAFT-{{ctx.body.category}}-{{now()}}"
+      created_at: "{{now()}}"
+      updated_at: "{{now()}}"
+      category: "{{ctx.body.category}}"
+      title: "{{ctx.body.title}}"
+      content: "{{ctx.body.content}}"
+      draft: true
+      draft_source_ticket_ids: "{{ctx.body.source_ticket_ids}}"
+
+  - id: slack_review_request
+    type: http
+    method: POST
+    url: "{{env.SLACK_WEBHOOK_URL}}"
+    body:
+      channel: "{{env.SLACK_SUPPORT_CHANNEL}}"
+      blocks:
+        - type: header
+          text:
+            type: plain_text
+            text: "📝 New KB Article Draft — Review Needed"
+        - type: section
+          text:
+            type: mrkdwn
+            text: |
+              *Category:* `{{ctx.body.category}}`
+              *Title:* {{ctx.body.title}}
+              *Based on:* {{ctx.body.ticket_count}} recent tickets with no KB coverage
+        - type: actions
+          elements:
+            - type: button
+              text:
+                type: plain_text
+                text: "✅ Approve & Publish"
+              style: primary
+              action_id: kb_approve
+              value: "{{ctx.body.article_id}}"
+            - type: button
+              text:
+                type: plain_text
+                text: "✏️ Edit First"
+              action_id: kb_edit
+              value: "{{ctx.body.article_id}}"

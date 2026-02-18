@@ -1,0 +1,29 @@
+# SupportIQ Workflow: General Slack Notifications
+# Triggered by: Any agent needing to send a Slack message
+# Action: Route notification to correct channel based on type
+id: supportiq_slack_notify
+name: "SupportIQ: Slack Notification Router"
+trigger:
+  type: webhook
+  method: POST
+  path: /supportiq/notify
+
+steps:
+  - id: send_notification
+    type: http
+    method: POST
+    url: "{{env.SLACK_WEBHOOK_URL}}"
+    body:
+      channel: "{{ctx.body.channel}}"
+      text: "{{ctx.body.text}}"
+
+  - id: log_notification
+    type: elasticsearch
+    action: index
+    index: agent-traces
+    document:
+      trace_id: "notify-{{now()}}"
+      timestamp: "{{now()}}"
+      agent_name: "{{ctx.body.agent_name}}"
+      action: slack_notification
+      output_summary: "Notification sent to {{ctx.body.channel}}"
